@@ -1,0 +1,45 @@
+version: "3.0"
+
+services:
+  mongodb_p:
+    container_name: mongodb_p
+    image: mongo:4.0.2
+    volumes:
+      - ./data/mongodata_p:/data/db
+      - ./mongo-entrypoint:/docker-entrypoint-initdb.d
+    command: ["mongod", "--replSet", "my-replica-set"]
+    ports:
+      - "27017:27017"
+    networks:
+      - mongoNet
+    restart: always
+  mongodb_r1:
+    container_name: mongodb_r1
+    image: mongo:4.0.2
+    volumes:
+      - ./data/mongodata_r1:/data/db
+    ports:
+      - "27018:27017"
+    command: ["mongod", "--replSet", "my-replica-set"]
+    networks:
+      - mongoNet
+    depends_on:
+      - mongodb_p
+    restart: always
+  mongodb_r2:
+    container_name: mongodb_r2
+    image: mongo:4.0.2
+    volumes:
+      - ./data/mongodata_r2:/data/db
+    ports:
+      - "27019:27017"
+    command: ["mongod", "--replSet", "my-replica-set"]
+    networks:
+      - mongoNet
+    depends_on:
+      - mongodb_p
+    restart: always
+
+networks:
+  mongoNet:
+    driver: bridge
